@@ -357,48 +357,28 @@ class _MLivelyness7DetectionScreenState
     if (_isProcessingStep) {
       return;
     }
-    final faceWidth = face.boundingBox.width;
-    final Point<int>? leftEyePosition = face
-        .getContour(
-          FaceContourType.leftEye,
-        )
-        ?.points
-        .elementAt(8);
-    final Point<int>? rightEyePosition = face
-        .getContour(
-          FaceContourType.rightEye,
-        )
-        ?.points
-        .elementAt(0);
-    if (leftEyePosition != null && rightEyePosition != null) {
-      final goldenRatio = (faceWidth /
-          leftEyePosition.distanceTo(
-            rightEyePosition,
-          ));
-      print("Golden Ratio: $goldenRatio");
-    }
     switch (step) {
       case M7LivelynessStep.blink:
         final M7BlinkDetectionThreshold? blinkThreshold =
-            M7LivelynessDetection.instance.thresholdConfig.firstWhereOrNull(
-          (p0) => p0 is M7BlinkDetectionThreshold,
+        M7LivelynessDetection.instance.thresholdConfig.firstWhereOrNull(
+              (p0) => p0 is M7BlinkDetectionThreshold,
         ) as M7BlinkDetectionThreshold?;
         if ((face.leftEyeOpenProbability ?? 1.0) <
-                (blinkThreshold?.leftEyeProbability ?? 0.25) &&
+            (blinkThreshold?.leftEyeProbability ?? 0.25) &&
             (face.rightEyeOpenProbability ?? 1.0) <
                 (blinkThreshold?.rightEyeProbability ?? 0.25)) {
           _startProcessing();
           if (mounted) {
             setState(
-              () => _didCloseEyes = true,
+                  () => _didCloseEyes = true,
             );
           }
         }
         break;
-      case M7LivelynessStep.turnLeft:
+      case M7LivelynessStep.turnRight:
         final M7HeadTurnDetectionThreshold? headTurnThreshold =
-            M7LivelynessDetection.instance.thresholdConfig.firstWhereOrNull(
-          (p0) => p0 is M7HeadTurnDetectionThreshold,
+        M7LivelynessDetection.instance.thresholdConfig.firstWhereOrNull(
+              (p0) => p0 is M7HeadTurnDetectionThreshold,
         ) as M7HeadTurnDetectionThreshold?;
         if ((face.headEulerAngleY ?? 0) >
             (headTurnThreshold?.rotationAngle ?? 45)) {
@@ -406,10 +386,21 @@ class _MLivelyness7DetectionScreenState
           await _completeStep(step: step);
         }
         break;
-      case M7LivelynessStep.turnRight:
+      case M7LivelynessStep.nod:
         final M7HeadTurnDetectionThreshold? headTurnThreshold =
-            M7LivelynessDetection.instance.thresholdConfig.firstWhereOrNull(
-          (p0) => p0 is M7HeadTurnDetectionThreshold,
+        M7LivelynessDetection.instance.thresholdConfig.firstWhereOrNull(
+              (p0) => p0 is M7HeadTurnDetectionThreshold,
+        ) as M7HeadTurnDetectionThreshold?;
+        if ((face.headEulerAngleX ?? 0) <
+            (headTurnThreshold?.rotationAngle ?? -15)) {
+          _startProcessing();
+          await _completeStep(step: step);
+        }
+        break;
+      case M7LivelynessStep.turnLeft:
+        final M7HeadTurnDetectionThreshold? headTurnThreshold =
+        M7LivelynessDetection.instance.thresholdConfig.firstWhereOrNull(
+              (p0) => p0 is M7HeadTurnDetectionThreshold,
         ) as M7HeadTurnDetectionThreshold?;
         if ((face.headEulerAngleY ?? 0) >
             (headTurnThreshold?.rotationAngle ?? -50)) {
@@ -419,8 +410,8 @@ class _MLivelyness7DetectionScreenState
         break;
       case M7LivelynessStep.smile:
         final M7SmileDetectionThreshold? smileThreshold =
-            M7LivelynessDetection.instance.thresholdConfig.firstWhereOrNull(
-          (p0) => p0 is M7SmileDetectionThreshold,
+        M7LivelynessDetection.instance.thresholdConfig.firstWhereOrNull(
+              (p0) => p0 is M7SmileDetectionThreshold,
         ) as M7SmileDetectionThreshold?;
         if ((face.smilingProbability ?? 0) >
             (smileThreshold?.probability ?? 0.75)) {

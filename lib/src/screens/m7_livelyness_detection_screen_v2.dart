@@ -246,7 +246,7 @@ class _M7LivelynessDetectionScreenAndroidState
           _startProcessing();
           if (mounted) {
             setState(
-              () => _didCloseEyes = true,
+                  () => _didCloseEyes = true,
             );
           }
         }
@@ -261,6 +261,13 @@ class _M7LivelynessDetectionScreenAndroidState
       case M7LivelynessStep.turnRight:
         const double headTurnThreshold = -50.0;
         if ((face.headEulerAngleY ?? 0) > (headTurnThreshold)) {
+          _startProcessing();
+          await _completeStep(step: step);
+        }
+        break;
+      case M7LivelynessStep.nod:
+        const double headTurnThreshold = -15.0;
+        if ((face.headEulerAngleX ?? 0) < (headTurnThreshold)) {
           _startProcessing();
           await _completeStep(step: step);
         }
